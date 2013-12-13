@@ -15,6 +15,7 @@ public class LocationActivity extends Activity implements LocationListener {
     private TextView text4;
     private LocationManager locationManager;
     private String provider;
+    private TextFormatter textFormatter = new TextFormatter();
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,7 +27,7 @@ public class LocationActivity extends Activity implements LocationListener {
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = LocationManager.GPS_PROVIDER;
-        text1.setText("waiting...");
+        text1.setText("wait...");
         locationManager.requestLocationUpdates(provider, 400, 1, this);
     }
 
@@ -44,9 +45,9 @@ public class LocationActivity extends Activity implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         text1.setText(location.getExtras().get("satellites") + " satellites (" + location.getAccuracy() + " m)");
-        text2.setText(location.getLatitude() + ", " + location.getLongitude());
-        text3.setText(location.getAltitude() + " meters above sea level");
-        text4.setText(location.getBearing() + "° at " + location.getSpeed() + " m/s");
+        text2.setText(textFormatter.getMetersPerSecond(location.getSpeed()));
+        text3.setText(textFormatter.getKph(location.getSpeed()));
+        text4.setText(textFormatter.getBearing(location.getBearing()));
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
