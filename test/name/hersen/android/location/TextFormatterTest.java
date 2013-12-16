@@ -34,19 +34,35 @@ public class TextFormatterTest {
 
     @Test
     public void mainDirections()  {
-        assertEquals("N", subject.getDirection(0f));
-        assertEquals("E", subject.getDirection(90f));
-        assertEquals("S", subject.getDirection(180f));
-        assertEquals("W", subject.getDirection(270f));
+        assertEquals("N", subject.getDirection(0f, 0.5f));
+        assertEquals("E", subject.getDirection(90f, 0.5f));
+        assertEquals("S", subject.getDirection(180f, 0.5f));
+        assertEquals("W", subject.getDirection(270f, 0.5f));
     }
 
     @Test
     public void approximateDirection()  {
-        assertEquals("E", subject.getDirection(100f));
+        assertEquals("E", subject.getDirection(100f, 0.5f));
     }
 
     @Test
     public void approximateDirectionPastWest()  {
-        assertEquals("N", subject.getDirection(350f));
+        assertEquals("N", subject.getDirection(350f, 0.5f));
+    }
+
+    @Test
+    public void diagonalDirections()  {
+        assertEquals("NE", subject.getDirection(45f, 0.5f));
+        assertEquals("SE", subject.getDirection(135f, 0.5f));
+    }
+
+    @Test
+    public void northWest()  {
+        assertEquals("NW", subject.getDirection(330f, 0.5f));
+    }
+
+    @Test
+    public void standingStill()  {
+        assertEquals("", subject.getDirection(0f, 0f));
     }
 }

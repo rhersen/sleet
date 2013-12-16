@@ -43,11 +43,15 @@ public class LocationActivity extends Activity implements LocationListener {
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        text1.setText(location.getExtras().get("satellites") + " satellites (" + location.getAccuracy() + " m)");
-        text2.setText(textFormatter.getMetersPerSecond(location.getSpeed()));
-        text3.setText(textFormatter.getKph(location.getSpeed()));
-        text4.setText(textFormatter.getBearing(location.getBearing()));
+    public void onLocationChanged(Location l) {
+        try {
+            text1.setText(l.getExtras().get("satellites") + " satellites (" + l.getAccuracy() + " m)");
+            text2.setText(textFormatter.getKph(l.getSpeed()));
+            text3.setText(textFormatter.getDirection(l.getBearing(), l.getSpeed()));
+            text4.setText(textFormatter.getBearing(l.getBearing()));
+        } catch (Exception e) {
+            text1.setText(e.toString());
+        }
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
