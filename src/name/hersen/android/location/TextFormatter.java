@@ -8,7 +8,11 @@ public class TextFormatter {
         return speed + " m/s";
     }
 
-    public String getBearing(float bearing) {
+    public String getBearing(float bearing, float speed) {
+        if (speed == 0) {
+            return "";
+        }
+
         return bearing + "°";
     }
 

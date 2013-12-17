@@ -28,8 +28,12 @@ public class TextFormatterTest {
 
     @Test
     public void bearing()  {
-        String result = subject.getBearing(28.12f);
-        assertEquals("28.12°", result);
+        assertEquals("28.12°", subject.getBearing(28.12f, .5f));
+    }
+
+    @Test
+    public void bearingForZeroDegreesIfSpeedIsGreaterThanZero()  {
+        assertEquals("0.0°", subject.getBearing(0, .5f));
     }
 
     @Test
@@ -64,5 +68,6 @@ public class TextFormatterTest {
     @Test
     public void standingStill()  {
         assertEquals("", subject.getDirection(0f, 0f));
+        assertEquals("", subject.getBearing(0f, 0f));
     }
 }

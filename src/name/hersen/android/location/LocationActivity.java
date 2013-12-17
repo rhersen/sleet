@@ -48,7 +48,7 @@ public class LocationActivity extends Activity implements LocationListener {
             text1.setText(l.getExtras().get("satellites") + " satellites (" + l.getAccuracy() + " m)");
             text2.setText(textFormatter.getKph(l.getSpeed()));
             text3.setText(textFormatter.getDirection(l.getBearing(), l.getSpeed()));
-            text4.setText(textFormatter.getBearing(l.getBearing()));
+            text4.setText(textFormatter.getBearing(l.getBearing(), l.getSpeed()));
         } catch (Exception e) {
             text1.setText(e.toString());
         }
