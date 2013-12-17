@@ -42,4 +42,14 @@ public class TextFormatter {
         int eastOrWest = (2 * Math.round((bearing + 90) / 180) + 3) % 4;
         return directions[northOrSouth] + "" + directions[eastOrWest];
     }
+
+    String getAccuracy(float accuracy, Object satellites) {
+        String s = satellites + " satellites";
+
+        if (Float.isInfinite(accuracy)) {
+            return s;
+        }
+
+        return s + " (" + accuracy + " m)";
+    }
 }

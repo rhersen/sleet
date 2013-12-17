@@ -27,7 +27,7 @@ public class LocationActivity extends Activity implements LocationListener {
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = LocationManager.GPS_PROVIDER;
-        text1.setText("wait...");
+        text1.setText(textFormatter.getAccuracy(Float.POSITIVE_INFINITY, 0));
         locationManager.requestLocationUpdates(provider, 400, 1, this);
     }
 
@@ -45,7 +45,7 @@ public class LocationActivity extends Activity implements LocationListener {
     @Override
     public void onLocationChanged(Location l) {
         try {
-            text1.setText(l.getExtras().get("satellites") + " satellites (" + l.getAccuracy() + " m)");
+            text1.setText(textFormatter.getAccuracy(l.getAccuracy(), l.getExtras().get("satellites")));
             text2.setText(textFormatter.getKph(l.getSpeed()));
             text3.setText(textFormatter.getDirection(l.getBearing(), l.getSpeed()));
             text4.setText(textFormatter.getBearing(l.getBearing(), l.getSpeed()));
