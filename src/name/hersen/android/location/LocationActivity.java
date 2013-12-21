@@ -6,13 +6,14 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 public class LocationActivity extends Activity implements LocationListener {
-    private TextView text1;
-    private TextView text2;
-    private TextView text3;
-    private TextView text4;
+    private TextView accuracy;
+    private TextView speed;
+    private TextView direction;
+    private TextView bearing;
     private LocationManager locationManager;
     private String provider;
     private TextFormatter textFormatter = new TextFormatter();
@@ -20,15 +21,16 @@ public class LocationActivity extends Activity implements LocationListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        text1 = (TextView) findViewById(R.id.TextView1);
-        text2 = (TextView) findViewById(R.id.TextView2);
-        text3 = (TextView) findViewById(R.id.TextView3);
-        text4 = (TextView) findViewById(R.id.TextView4);
+        accuracy = (TextView) findViewById(R.id.AccuracyText);
+        speed = (TextView) findViewById(R.id.SpeedText);
+        direction = (TextView) findViewById(R.id.DirectionText);
+        bearing = (TextView) findViewById(R.id.BearingText);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = LocationManager.GPS_PROVIDER;
-        text1.setText(textFormatter.getAccuracy(Float.POSITIVE_INFINITY, 0));
+        accuracy.setText(textFormatter.getAccuracy(Float.POSITIVE_INFINITY, 0));
         locationManager.requestLocationUpdates(provider, 400, 1, this);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     protected void onResume() {
@@ -45,24 +47,30 @@ public class LocationActivity extends Activity implements LocationListener {
     @Override
     public void onLocationChanged(Location l) {
         try {
-            text1.setText(textFormatter.getAccuracy(l.getAccuracy(), l.getExtras().get("satellites")));
-            text2.setText(textFormatter.getKph(l.getSpeed()));
-            text3.setText(textFormatter.getDirection(l.getBearing(), l.getSpeed()));
-            text4.setText(textFormatter.getBearing(l.getBearing(), l.getSpeed()));
+            accuracy.setText(textFormatter.getAccuracy(l.getAccuracy(), l.getExtras().get("satellites")));
+            speed.setText(textFormatter.getKph(l.getSpeed()));
+            direction.setText(textFormatter.getDirection(l.getBearing(), l.getSpeed()));
+            bearing.setText(textFormatter.getBearing(l.getBearing(), l.getSpeed()));
+
+            if (l.getSpeed() == 0) {
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            } else {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
         } catch (Exception e) {
-            text1.setText(e.toString());
+            accuracy.setText(e.toString());
         }
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        text1.setText("onStatusChanged: " + status);
+        accuracy.setText("onStatusChanged: " + status);
     }
 
     public void onProviderEnabled(String provider) {
-        text1.setText("Enabled new provider " + provider);
+        accuracy.setText("Enabled new provider " + provider);
     }
 
     public void onProviderDisabled(String provider) {
-        text1.setText("Disabled provider " + provider);
+        accuracy.setText("Disabled provider " + provider);
     }
 }

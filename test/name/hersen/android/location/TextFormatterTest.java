@@ -3,6 +3,10 @@ package name.hersen.android.location;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 public class TextFormatterTest {
@@ -75,8 +79,24 @@ public class TextFormatterTest {
     public void accuracy() {
         assertEquals("9 satellites (7.5 m)", subject.getAccuracy(7.5f, 9));
     }
+
+    @Test
+    public void shouldNotAddDotZero() {
+        assertEquals("9 satellites (8 m)", subject.getAccuracy(8f, 9));
+    }
+
     @Test
     public void accuracyBeforeGpsFix() {
         assertEquals("0 satellites", subject.getAccuracy(Float.POSITIVE_INFINITY, 0));
+    }
+
+    @Test
+    public void map() {
+List<Integer>list=Arrays.asList(1,2,3);
+ArrayList<Integer>arrayList=new ArrayList<Integer>();
+for(Integer i:list){
+  arrayList.add(i*2);
+}
+        assertEquals(Arrays.asList(2, 4, 6), arrayList);
     }
 }

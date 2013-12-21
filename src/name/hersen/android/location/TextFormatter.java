@@ -44,12 +44,25 @@ public class TextFormatter {
     }
 
     String getAccuracy(float accuracy, Object satellites) {
-        String s = satellites + " satellites";
+        StringBuilder s = new StringBuilder();
 
-        if (Float.isInfinite(accuracy)) {
-            return s;
+        s.append(satellites);
+        s.append(" satellites");
+
+        if (!Float.isInfinite(accuracy)) {
+            s.append(" (");
+
+            int round = Math.round(accuracy);
+
+            if (round == accuracy) {
+                s.append(round);
+            } else {
+                s.append(accuracy);
+            }
+
+            s.append(" m)");
         }
 
-        return s + " (" + accuracy + " m)";
+        return s.toString();
     }
 }
