@@ -3,10 +3,6 @@ package name.hersen.android.location;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 
 public class TextFormatterTest {
@@ -91,12 +87,46 @@ public class TextFormatterTest {
     }
 
     @Test
-    public void map() {
-List<Integer>list=Arrays.asList(1,2,3);
-ArrayList<Integer>arrayList=new ArrayList<Integer>();
-for(Integer i:list){
-  arrayList.add(i*2);
-}
-        assertEquals(Arrays.asList(2, 4, 6), arrayList);
+    public void getImageResource() {
+        assertEquals(R.drawable.t36, subject.getImageResource(59.2, 17.89));
+        assertEquals(R.drawable.t37, subject.getImageResource(59.2, 17.9));
+        assertEquals(R.drawable.t22, subject.getImageResource(59.21, 17.89));
+        assertEquals(R.drawable.t23, subject.getImageResource(59.21, 17.9));
+        assertEquals(R.drawable.t0, subject.getImageResource(59.225, 17.88));
+        assertEquals(R.drawable.t76, subject.getImageResource(59.177, 17.932));
     }
+
+    @Test
+    public void corners() {
+        assertEquals(R.drawable.t1, subject.getImageResource(59.2235, 17.8842));
+        assertEquals(R.drawable.t13, subject.getImageResource(59.2224, 17.931));
+        assertEquals(R.drawable.t63, subject.getImageResource(59.1804, 17.8804));
+        assertEquals(R.drawable.t75, subject.getImageResource(59.179, 17.9274));
+    }
+
+    @Test
+    public void getColumn() {
+        assertEquals(0, subject.getColumn(17.88));
+        assertEquals(0, subject.getColumn(17.8804));
+        assertEquals(1, subject.getColumn(17.8842));
+        assertEquals(1, subject.getColumn(17.89));
+        assertEquals(5, subject.getColumn(17.921));
+        assertEquals(5, subject.getColumn(17.9274));
+        assertEquals(6, subject.getColumn(17.932));
+        assertEquals(6, subject.getColumn(17.931));
+    }
+
+    @Test
+    public void getRow() {
+        assertEquals(0, subject.getRow(59.225));
+        assertEquals(0, subject.getRow(59.2235));
+        assertEquals(1, subject.getRow(59.2224));
+        assertEquals(3, subject.getRow(59.21));
+        assertEquals(5, subject.getRow(59.2));
+        assertEquals(6, subject.getRow(59.194));
+        assertEquals(9, subject.getRow(59.1804));
+        assertEquals(10, subject.getRow(59.179));
+        assertEquals(10, subject.getRow(59.177));
+    }
+
 }

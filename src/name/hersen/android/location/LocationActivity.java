@@ -7,6 +7,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class LocationActivity extends Activity implements LocationListener {
@@ -17,6 +18,7 @@ public class LocationActivity extends Activity implements LocationListener {
     private LocationManager locationManager;
     private String provider;
     private TextFormatter textFormatter = new TextFormatter();
+    private ImageView image;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +27,7 @@ public class LocationActivity extends Activity implements LocationListener {
         speed = (TextView) findViewById(R.id.SpeedText);
         direction = (TextView) findViewById(R.id.DirectionText);
         bearing = (TextView) findViewById(R.id.BearingText);
+        image = (ImageView) findViewById(R.id.map);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = LocationManager.GPS_PROVIDER;
@@ -51,6 +54,7 @@ public class LocationActivity extends Activity implements LocationListener {
             speed.setText(textFormatter.getKph(l.getSpeed()));
             direction.setText(textFormatter.getDirection(l.getBearing(), l.getSpeed()));
             bearing.setText(textFormatter.getBearing(l.getBearing(), l.getSpeed()));
+            image.setImageResource(textFormatter.getImageResource(l.getLatitude(), l.getLongitude()));
 
             if (l.getSpeed() == 0) {
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
