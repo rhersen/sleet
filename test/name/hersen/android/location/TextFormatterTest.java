@@ -87,24 +87,6 @@ public class TextFormatterTest {
     }
 
     @Test
-    public void getImageResource() {
-        assertEquals(R.drawable.t36, subject.getImageResource(59.2, 17.89));
-        assertEquals(R.drawable.t37, subject.getImageResource(59.2, 17.9));
-        assertEquals(R.drawable.t22, subject.getImageResource(59.21, 17.89));
-        assertEquals(R.drawable.t23, subject.getImageResource(59.21, 17.9));
-        assertEquals(R.drawable.t0, subject.getImageResource(59.225, 17.88));
-        assertEquals(R.drawable.t76, subject.getImageResource(59.177, 17.932));
-    }
-
-    @Test
-    public void corners() {
-        assertEquals(R.drawable.t1, subject.getImageResource(59.2235, 17.8842));
-        assertEquals(R.drawable.t13, subject.getImageResource(59.2224, 17.931));
-        assertEquals(R.drawable.t63, subject.getImageResource(59.1804, 17.8804));
-        assertEquals(R.drawable.t75, subject.getImageResource(59.179, 17.9274));
-    }
-
-    @Test
     public void getColumn() {
         assertEquals(0, subject.getColumn(17.88));
         assertEquals(0, subject.getColumn(17.8804));
@@ -127,6 +109,14 @@ public class TextFormatterTest {
         assertEquals(9, subject.getRow(59.1804));
         assertEquals(10, subject.getRow(59.179));
         assertEquals(10, subject.getRow(59.177));
+    }
+
+    @Test
+    public void parseOneDistance() {
+        assertEquals("", subject.parseDistance(""));
+        assertEquals("1 n", subject.parseDistance("[{\"name\":\"n\",\"distance\":1}]"));
+        assertEquals("1 X", subject.parseDistance("[{\"name\":\"X\",\"distance\":1}]"));
+        assertEquals("2 n", subject.parseDistance("[{\"name\":\"n\",\"distance\":2}]"));
     }
 
 }
