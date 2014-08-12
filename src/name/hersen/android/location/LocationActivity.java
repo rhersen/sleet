@@ -13,12 +13,15 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 
 public class LocationActivity extends Activity implements LocationListener {
-    private TextView accuracy;
-    private TextView speed;
-    private TextView direction;
-    private TextView bearing;
+    private TextView row1;
+    private TextView row2;
+    private TextView row3;
+    private TextView row4;
+    private TextView row5;
     private LocationManager locationManager;
     private String provider;
     private TextFormatter textFormatter = new TextFormatter();
@@ -26,14 +29,15 @@ public class LocationActivity extends Activity implements LocationListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        accuracy = (TextView) findViewById(R.id.AccuracyText);
-        speed = (TextView) findViewById(R.id.SpeedText);
-        direction = (TextView) findViewById(R.id.DirectionText);
-        bearing = (TextView) findViewById(R.id.BearingText);
+        row1 = (TextView) findViewById(R.id.AccuracyText);
+        row2 = (TextView) findViewById(R.id.SpeedText);
+        row3 = (TextView) findViewById(R.id.DirectionText);
+        row4 = (TextView) findViewById(R.id.BearingText);
+        row5 = (TextView) findViewById(R.id.Row5Text);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = LocationManager.GPS_PROVIDER;
-        accuracy.setText(textFormatter.getAccuracy(Float.POSITIVE_INFINITY, 0));
+        row1.setText(textFormatter.getAccuracy(Float.POSITIVE_INFINITY, 0));
         locationManager.requestLocationUpdates(provider, 400, 1, this);
     }
 
@@ -51,14 +55,11 @@ public class LocationActivity extends Activity implements LocationListener {
     @Override
     public void onLocationChanged(Location l) {
         try {
-            speed.setText(textFormatter.getKph(l.getSpeed()));
-            direction.setText("lat: " + l.getLatitude());
-            bearing.setText("lon: " + l.getLongitude());
             String server = "sl.hersen.name:3000";
             URL url = new URL("http://" + server + "/nearest?latitude=" + l.getLatitude() + "&longitude=" + l.getLongitude());
-            new RequestTask(accuracy).execute(url);
+            new RequestTask(row1, row2, row3, row4, row5).execute(url);
         } catch (Exception e) {
-            accuracy.setText(e.toString());
+            row1.setText(e.toString());
         }
     }
 
@@ -66,35 +67,39 @@ public class LocationActivity extends Activity implements LocationListener {
     }
 
     public void onProviderEnabled(String provider) {
-        accuracy.setText("Enabled new provider " + provider);
+        row1.setText("Enabled new provider " + provider);
     }
 
     public void onProviderDisabled(String provider) {
-        accuracy.setText("Disabled provider " + provider);
+        row1.setText("Disabled provider " + provider);
     }
 }
 
-class RequestTask extends AsyncTask<URL, Void, String> {
-    private TextView target;
+class RequestTask extends AsyncTask<URL, Void, List<String>> {
+    private TextView[] targets;
     private TextFormatter textFormatter = new TextFormatter();
 
-    public RequestTask(TextView target) {
-        this.target = target;
+    public RequestTask(TextView... targets) {
+        this.targets = targets;
     }
 
-    protected String doInBackground(URL... params) {
+    protected List<String> doInBackground(URL... params) {
         try {
             URL url = params[0];
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
             return textFormatter.parseDistance(reader.readLine());
         } catch (Exception e) {
-            return e.toString();
+            return Collections.singletonList(e.toString());
         }
     }
 
     @Override
-    protected void onPostExecute(String s) {
-        target.setText(s);
+    protected void onPostExecute(List<String> s) {
+        int n = targets.length < s.size() ? targets.length : s.size();
+        for (int i = 0; i < n; i++) {
+            TextView target = targets[i];
+            target.setText(s.get(i));
+        }
     }
 }

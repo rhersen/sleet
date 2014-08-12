@@ -1,7 +1,11 @@
 package name.hersen.android.location;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class TextFormatter {
 
@@ -79,14 +83,17 @@ public class TextFormatter {
         return (int) d;
     }
 
-    public String parseDistance(String s) {
-        Pattern pattern = Pattern.compile("..\\\"name\\\":\\\"(.+)\\\",\\\"distance\\\":(\\d+)..");
-        Matcher matcher = pattern.matcher(s);
-
-        if (!matcher.matches()) {
-            return s;
+    public List<String> parseDistance(String s) {
+        try {
+            ArrayList<String> r = new ArrayList<String>();
+            JSONArray jsonArray = new JSONArray(s);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject json = (JSONObject) jsonArray.get(i);
+                r.add(json.getInt("distance") + " " + json.getString("name"));
+            }
+            return r;
+        } catch (Exception e) {
+            return Collections.singletonList(s);
         }
-
-        return matcher.group(2) + " " + matcher.group(1);
     }
 }

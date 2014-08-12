@@ -111,12 +111,4 @@ public class TextFormatterTest {
         assertEquals(10, subject.getRow(59.177));
     }
 
-    @Test
-    public void parseOneDistance() {
-        assertEquals("", subject.parseDistance(""));
-        assertEquals("1 n", subject.parseDistance("[{\"name\":\"n\",\"distance\":1}]"));
-        assertEquals("1 X", subject.parseDistance("[{\"name\":\"X\",\"distance\":1}]"));
-        assertEquals("2 n", subject.parseDistance("[{\"name\":\"n\",\"distance\":2}]"));
-    }
-
 }
