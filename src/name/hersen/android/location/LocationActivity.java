@@ -53,7 +53,7 @@ public class LocationActivity extends Activity implements LocationListener {
     @Override
     public void onLocationChanged(Location l) {
         try {
-            String server = "sl.hersen.name:3000";
+            String server = "sl.hersen.name";
             URL url = new URL("http://" + server + "/nearest?" +
                     "latitude=" + l.getLatitude() +
                     "&longitude=" + l.getLongitude());
