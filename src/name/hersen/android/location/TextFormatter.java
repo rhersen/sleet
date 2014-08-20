@@ -40,7 +40,7 @@ public class TextFormatter {
             JSONArray jsonArray = new JSONArray(s);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject json = (JSONObject) jsonArray.get(i);
-                r.add(json.getInt("distance") + " " + json.getString("name"));
+                r.add(json.getInt("distance") + " " + json.getString("name") + " " + json.getString("site") + " " + json.getString("area"));
             }
             return r;
         } catch (Exception e) {
