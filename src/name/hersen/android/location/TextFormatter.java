@@ -34,17 +34,17 @@ public class TextFormatter {
         return s.toString();
     }
 
-    public List<String> parseJson(String s) {
+    public List<StopPoint> parseJson(String s) {
         try {
-            List<String> r = new ArrayList<String>();
+            List<StopPoint> r = new ArrayList<StopPoint>();
             JSONArray jsonArray = new JSONArray(s);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject json = (JSONObject) jsonArray.get(i);
-                r.add(json.getInt("distance") + " " + json.getString("name") + " " + json.getString("site") + " " + json.getString("area"));
+                r.add(new StopPoint(json.getInt("distance"), json.getString("name"), json.getString("site"), json.getString("area")));
             }
             return r;
         } catch (Exception e) {
-            return singletonList(s);
+            return singletonList(null);
         }
     }
 }

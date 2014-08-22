@@ -7,6 +7,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -16,7 +17,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
+import static java.util.Collections.emptyList;
 
 public class LocationActivity extends Activity implements LocationListener {
     private List<TextView> rows = new ArrayList<TextView>();
@@ -36,6 +37,12 @@ public class LocationActivity extends Activity implements LocationListener {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = LocationManager.GPS_PROVIDER;
         rows.get(0).setText(textFormatter.getAccuracy(Float.POSITIVE_INFINITY, 0));
+        rows.get(0).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rows.get(0).setText("OnClickListener");
+            }
+        });
         locationManager.requestLocationUpdates(provider, 400, 1, this);
     }
 
@@ -75,7 +82,7 @@ public class LocationActivity extends Activity implements LocationListener {
     }
 }
 
-class RequestTask extends AsyncTask<URL, Void, List<String>> {
+class RequestTask extends AsyncTask<URL, Void, List<StopPoint>> {
     private List<TextView> targets;
     private TextFormatter textFormatter = new TextFormatter();
 
@@ -83,22 +90,23 @@ class RequestTask extends AsyncTask<URL, Void, List<String>> {
         this.targets = targets;
     }
 
-    protected List<String> doInBackground(URL... params) {
+    protected List<StopPoint> doInBackground(URL... params) {
         try {
             URL url = params[0];
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
             return textFormatter.parseJson(reader.readLine());
         } catch (Exception e) {
-            return singletonList(e.toString());
+            return emptyList();
         }
     }
 
     @Override
-    protected void onPostExecute(List<String> s) {
+    protected void onPostExecute(List<StopPoint> s) {
         for (int i = 0; i < targets.size() && i < s.size(); i++) {
             TextView target = targets.get(i);
-            target.setText(s.get(i));
+            StopPoint p = s.get(i);
+            target.setText(p.site + " " + p.distance + " " + p.name + " " + p.area);
         }
     }
 }
