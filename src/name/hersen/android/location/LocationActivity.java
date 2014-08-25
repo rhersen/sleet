@@ -20,7 +20,7 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 
 public class LocationActivity extends Activity implements LocationListener {
-    private List<TextView> rows = new ArrayList<TextView>();
+    private List<Row> rows = new ArrayList<Row>();
     private LocationManager locationManager;
     private String provider;
     private TextFormatter textFormatter = new TextFormatter();
@@ -28,22 +28,20 @@ public class LocationActivity extends Activity implements LocationListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        rows.add((TextView) findViewById(R.id.Row1Text));
-        rows.add((TextView) findViewById(R.id.Row2Text));
-        rows.add((TextView) findViewById(R.id.Row3Text));
-        rows.add((TextView) findViewById(R.id.Row4Text));
-        rows.add((TextView) findViewById(R.id.Row5Text));
+        rows.add(getRow(R.id.Row1Text));
+        rows.add(getRow(R.id.Row2Text));
+        rows.add(getRow(R.id.Row3Text));
+        rows.add(getRow(R.id.Row4Text));
+        rows.add(getRow(R.id.Row5Text));
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = LocationManager.GPS_PROVIDER;
         rows.get(0).setText(textFormatter.getAccuracy(Float.POSITIVE_INFINITY, 0));
-        rows.get(0).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                rows.get(0).setText("OnClickListener");
-            }
-        });
         locationManager.requestLocationUpdates(provider, 400, 1, this);
+    }
+
+    private Row getRow(final int id) {
+        return new Row(findViewById(id));
     }
 
     protected void onResume() {
@@ -83,10 +81,10 @@ public class LocationActivity extends Activity implements LocationListener {
 }
 
 class RequestTask extends AsyncTask<URL, Void, List<StopPoint>> {
-    private List<TextView> targets;
+    private List<Row> targets;
     private TextFormatter textFormatter = new TextFormatter();
 
-    public RequestTask(List<TextView> targets) {
+    RequestTask(List<Row> targets) {
         this.targets = targets;
     }
 
@@ -104,9 +102,32 @@ class RequestTask extends AsyncTask<URL, Void, List<StopPoint>> {
     @Override
     protected void onPostExecute(List<StopPoint> s) {
         for (int i = 0; i < targets.size() && i < s.size(); i++) {
-            TextView target = targets.get(i);
-            StopPoint p = s.get(i);
-            target.setText(p.site + " " + p.distance + " " + p.name + " " + p.area);
+            targets.get(i).setStopPoint(s.get(i));
         }
+    }
+}
+
+class Row implements View.OnClickListener {
+    private final TextView view;
+    private StopPoint stopPoint;
+
+    Row(View view) {
+        this.view = (TextView) view;
+        View.OnClickListener listener = this;
+        view.setOnClickListener(listener);
+    }
+
+    void setText(String s) {
+        view.setText(s);
+    }
+
+    @Override
+    public void onClick(View v) {
+        setText(stopPoint.site);
+    }
+
+    void setStopPoint(StopPoint p) {
+        stopPoint = p;
+        this.setText(p.site + " " + p.distance + " " + p.name + " " + p.area);
     }
 }
