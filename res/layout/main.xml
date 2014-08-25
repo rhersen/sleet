@@ -5,7 +5,19 @@
     android:orientation="vertical" >
 
     <LinearLayout
-        android:id="@+id/accuracyLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <TextView
+            android:id="@+id/StatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15dip"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
@@ -18,7 +30,6 @@
         </TextView>
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/speedLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >

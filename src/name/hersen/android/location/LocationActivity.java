@@ -13,6 +13,7 @@ import android.widget.TextView;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +21,16 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 
 public class LocationActivity extends Activity implements LocationListener {
+    private TextView status;
     private List<Row> rows = new ArrayList<Row>();
     private LocationManager locationManager;
     private String provider;
-    private TextFormatter textFormatter = new TextFormatter();
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        status = (TextView) findViewById(R.id.StatusText);
+
         rows.add(getRow(R.id.Row1Text));
         rows.add(getRow(R.id.Row2Text));
         rows.add(getRow(R.id.Row3Text));
@@ -36,12 +39,12 @@ public class LocationActivity extends Activity implements LocationListener {
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = LocationManager.GPS_PROVIDER;
-        rows.get(0).setText(textFormatter.getAccuracy(Float.POSITIVE_INFINITY, 0));
+        status.setText("This is sleet.");
         locationManager.requestLocationUpdates(provider, 400, 1, this);
     }
 
     private Row getRow(final int id) {
-        return new Row(findViewById(id));
+        return new Row(findViewById(id), status);
     }
 
     protected void onResume() {
@@ -49,22 +52,16 @@ public class LocationActivity extends Activity implements LocationListener {
         locationManager.requestLocationUpdates(provider, 400, 1, this);
     }
 
-    @Override
     protected void onPause() {
         super.onPause();
         locationManager.removeUpdates(this);
     }
 
-    @Override
     public void onLocationChanged(Location l) {
         try {
-            String server = "sl.hersen.name";
-            URL url = new URL("http://" + server + "/nearest?" +
-                    "latitude=" + l.getLatitude() +
-                    "&longitude=" + l.getLongitude());
-            new RequestTask(rows).execute(url);
+            new GetNearest(rows).execute(l);
         } catch (Exception e) {
-            rows.get(0).setText(e.toString());
+            status.setText(e.toString());
         }
     }
 
@@ -72,25 +69,26 @@ public class LocationActivity extends Activity implements LocationListener {
     }
 
     public void onProviderEnabled(String provider) {
-        rows.get(0).setText("Enabled new provider " + provider);
+        status.setText("Enabled new provider " + provider);
     }
 
     public void onProviderDisabled(String provider) {
-        rows.get(0).setText("Disabled provider " + provider);
+        status.setText("Disabled provider " + provider);
     }
 }
 
-class RequestTask extends AsyncTask<URL, Void, List<StopPoint>> {
+class GetNearest extends AsyncTask<Location, Void, List<StopPoint>> {
     private List<Row> targets;
     private TextFormatter textFormatter = new TextFormatter();
 
-    RequestTask(List<Row> targets) {
+    GetNearest(List<Row> targets) {
         this.targets = targets;
     }
 
-    protected List<StopPoint> doInBackground(URL... params) {
+    protected List<StopPoint> doInBackground(Location... params) {
         try {
-            URL url = params[0];
+            Location l = params[0];
+            URL url = getUrl(l);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
             return textFormatter.parseJson(reader.readLine());
@@ -99,7 +97,11 @@ class RequestTask extends AsyncTask<URL, Void, List<StopPoint>> {
         }
     }
 
-    @Override
+    private URL getUrl(Location l) throws MalformedURLException {
+        return new URL("http://" + "sl.hersen.name" +
+                "/nearest?latitude=" + l.getLatitude() + "&longitude=" + l.getLongitude());
+    }
+
     protected void onPostExecute(List<StopPoint> s) {
         for (int i = 0; i < targets.size() && i < s.size(); i++) {
             targets.get(i).setStopPoint(s.get(i));
@@ -110,24 +112,21 @@ class RequestTask extends AsyncTask<URL, Void, List<StopPoint>> {
 class Row implements View.OnClickListener {
     private final TextView view;
     private StopPoint stopPoint;
+    private TextView status;
 
-    Row(View view) {
+    Row(View view, View status) {
         this.view = (TextView) view;
+        this.status = (TextView) status;
         View.OnClickListener listener = this;
         view.setOnClickListener(listener);
     }
 
-    void setText(String s) {
-        view.setText(s);
-    }
-
-    @Override
     public void onClick(View v) {
-        setText(stopPoint.site);
+        status.setText(stopPoint.site);
     }
 
     void setStopPoint(StopPoint p) {
         stopPoint = p;
-        this.setText(p.site + " " + p.distance + " " + p.name + " " + p.area);
+        view.setText(p.site + " " + p.distance + " " + p.name + " " + p.area);
     }
 }
