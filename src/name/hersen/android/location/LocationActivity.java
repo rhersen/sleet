@@ -135,7 +135,6 @@ class Row implements View.OnClickListener {
 
     void setStopPoint(StopPoint p) {
         stopPoint = p;
-        System.out.println(text);
         text.setText(p.site + " " + p.distance + " " + p.name + " " + p.area);
     }
 }
@@ -147,13 +146,11 @@ class GetDepartures extends AsyncTask<String, Void, String> {
         this.status = status;
     }
 
-    protected String doInBackground(String... params) {
-        status.setText("doInBackground");
-        return params[0];
+    protected void onPostExecute(String s) {
+        status.setText(s);
     }
 
-    @Override
-    protected void onPostExecute(String s) {
-        status.setText("onPostExecute");
+    protected String doInBackground(String... params) {
+        return params[0];
     }
 }
