@@ -11,10 +11,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,9 +58,9 @@ public class LocationActivity extends Activity implements LocationListener {
         locationManager.removeUpdates(this);
     }
 
-    public void onLocationChanged(Location l) {
+    public void onLocationChanged(Location location) {
         try {
-            new GetNearest(rows).execute(l);
+            new GetNearest(rows, new Connecter()).execute(location);
         } catch (Exception e) {
             status.setText(e.toString());
         }
@@ -79,27 +80,24 @@ public class LocationActivity extends Activity implements LocationListener {
 
 class GetNearest extends AsyncTask<Location, Void, List<StopPoint>> {
     private List<Row> targets;
+    private Connecter connecter;
     private TextFormatter textFormatter = new TextFormatter();
 
-    GetNearest(List<Row> targets) {
+    GetNearest(List<Row> targets, Connecter connecter) {
         this.targets = targets;
+        this.connecter = connecter;
     }
 
-    protected List<StopPoint> doInBackground(Location... params) {
+    protected List<StopPoint> doInBackground(Location... locations) {
         try {
-            Location l = params[0];
-            URL url = getUrl(l);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            URLConnection con = connecter.getConnection(locations[0]);
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
             return textFormatter.parseJson(reader.readLine());
-        } catch (Exception e) {
+        } catch (MalformedURLException e) {
+            return emptyList();
+        } catch (IOException e) {
             return emptyList();
         }
-    }
-
-    private URL getUrl(Location l) throws MalformedURLException {
-        return new URL("http://" + "sl.hersen.name" +
-                "/nearest?latitude=" + l.getLatitude() + "&longitude=" + l.getLongitude());
     }
 
     protected void onPostExecute(List<StopPoint> s) {
@@ -109,24 +107,53 @@ class GetNearest extends AsyncTask<Location, Void, List<StopPoint>> {
     }
 }
 
+class Connecter {
+    URLConnection getConnection(Location l) throws IOException {
+        String server = "sl.hersen.name";
+        URL url = new URL("http://" + server + "/nearest" +
+                "?latitude=" + l.getLatitude() +
+                "&longitude=" + l.getLongitude());
+        return url.openConnection();
+    }
+}
+
 class Row implements View.OnClickListener {
-    private final TextView view;
+    private final TextView text;
     private StopPoint stopPoint;
     private TextView status;
 
-    Row(View view, View status) {
-        this.view = (TextView) view;
+    Row(View text, View status) {
+        this.text = (TextView) text;
         this.status = (TextView) status;
         View.OnClickListener listener = this;
-        view.setOnClickListener(listener);
+        text.setOnClickListener(listener);
     }
 
     public void onClick(View v) {
-        status.setText(stopPoint.site);
+        new GetDepartures(status).execute(stopPoint.site);
     }
 
     void setStopPoint(StopPoint p) {
         stopPoint = p;
-        view.setText(p.site + " " + p.distance + " " + p.name + " " + p.area);
+        System.out.println(text);
+        text.setText(p.site + " " + p.distance + " " + p.name + " " + p.area);
+    }
+}
+
+class GetDepartures extends AsyncTask<String, Void, String> {
+    private TextView status;
+
+    public GetDepartures(TextView status) {
+        this.status = status;
+    }
+
+    protected String doInBackground(String... params) {
+        status.setText("doInBackground");
+        return params[0];
+    }
+
+    @Override
+    protected void onPostExecute(String s) {
+        status.setText("onPostExecute");
     }
 }
