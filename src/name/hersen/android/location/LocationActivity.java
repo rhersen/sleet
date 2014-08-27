@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 public class LocationActivity extends Activity implements LocationListener {
     private TextView status;
@@ -81,7 +84,6 @@ public class LocationActivity extends Activity implements LocationListener {
 class GetNearest extends AsyncTask<Location, Void, List<StopPoint>> {
     private List<Row> targets;
     private Connecter connecter;
-    private TextFormatter textFormatter = new TextFormatter();
 
     GetNearest(List<Row> targets, Connecter connecter) {
         this.targets = targets;
@@ -92,7 +94,17 @@ class GetNearest extends AsyncTask<Location, Void, List<StopPoint>> {
         try {
             URLConnection con = connecter.getConnection(locations[0]);
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            return textFormatter.parseJson(reader.readLine());
+            try {
+                List<StopPoint> r = new ArrayList<StopPoint>();
+                JSONArray jsonArray = new JSONArray(reader.readLine());
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = (JSONObject) jsonArray.get(i);
+                    r.add(new StopPoint(json));
+                }
+                return r;
+            } catch (Exception e) {
+                return singletonList(null);
+            }
         } catch (MalformedURLException e) {
             return emptyList();
         } catch (IOException e) {
