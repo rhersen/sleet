@@ -10,19 +10,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 
 public class LocationActivity extends Activity implements LocationListener {
     private TextView status;
@@ -93,23 +92,22 @@ class GetNearest extends AsyncTask<Location, Void, List<StopPoint>> {
     protected List<StopPoint> doInBackground(Location... locations) {
         try {
             URLConnection con = connecter.getConnection(locations[0]);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            try {
-                List<StopPoint> r = new ArrayList<StopPoint>();
-                JSONArray jsonArray = new JSONArray(reader.readLine());
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject json = (JSONObject) jsonArray.get(i);
-                    r.add(new StopPoint(json));
-                }
-                return r;
-            } catch (Exception e) {
-                return singletonList(null);
-            }
-        } catch (MalformedURLException e) {
-            return emptyList();
+            return readStopPoints(new BufferedReader(new InputStreamReader(con.getInputStream())));
         } catch (IOException e) {
             return emptyList();
+        } catch (JSONException e) {
+            return emptyList();
         }
+    }
+
+    private List<StopPoint> readStopPoints(BufferedReader reader) throws JSONException, IOException {
+        List<StopPoint> r = new ArrayList<StopPoint>();
+        JSONArray jsonArray = new JSONArray(reader.readLine());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject json = (JSONObject) jsonArray.get(i);
+            r.add(new StopPoint(json));
+        }
+        return r;
     }
 
     protected void onPostExecute(List<StopPoint> s) {
