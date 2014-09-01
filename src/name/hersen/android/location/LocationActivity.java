@@ -24,6 +24,7 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 
 public class LocationActivity extends Activity implements LocationListener {
+    private final Connecter connecter = new Connecter();
     private TextView status;
     private List<Row> rows = new ArrayList<Row>();
     private LocationManager locationManager;
@@ -47,7 +48,7 @@ public class LocationActivity extends Activity implements LocationListener {
     }
 
     private Row getRow(final int id) {
-        return new Row(findViewById(id), status);
+        return new Row(findViewById(id), status, connecter);
     }
 
     protected void onResume() {
@@ -62,7 +63,7 @@ public class LocationActivity extends Activity implements LocationListener {
 
     public void onLocationChanged(Location location) {
         try {
-            new GetNearest(rows, new Connecter()).execute(location);
+            new GetNearest(rows, connecter).execute(location);
         } catch (Exception e) {
             status.setText(e.toString());
         }
@@ -118,11 +119,18 @@ class GetNearest extends AsyncTask<Location, Void, List<StopPoint>> {
 }
 
 class Connecter {
+
+    private final String server = "sl.hersen.name";
+
     URLConnection getConnection(Location l) throws IOException {
-        String server = "sl.hersen.name";
         URL url = new URL("http://" + server + "/nearest" +
                 "?latitude=" + l.getLatitude() +
                 "&longitude=" + l.getLongitude());
+        return url.openConnection();
+    }
+
+    public URLConnection getConnection(String site) throws IOException {
+        URL url = new URL("http://" + server + "/departures/" + site);
         return url.openConnection();
     }
 }
@@ -131,8 +139,10 @@ class Row implements View.OnClickListener {
     private final TextView text;
     private StopPoint stopPoint;
     private TextView status;
+    private Connecter connecter;
 
-    Row(View text, View status) {
+    Row(View text, View status, Connecter connecter) {
+        this.connecter = connecter;
         this.text = (TextView) text;
         this.status = (TextView) status;
         View.OnClickListener listener = this;
@@ -140,7 +150,7 @@ class Row implements View.OnClickListener {
     }
 
     public void onClick(View v) {
-        new GetDepartures(status).execute(stopPoint.site);
+        new GetDepartures(status, connecter).execute(stopPoint.site);
     }
 
     void setStopPoint(StopPoint p) {
@@ -151,9 +161,11 @@ class Row implements View.OnClickListener {
 
 class GetDepartures extends AsyncTask<String, Void, String> {
     private TextView status;
+    private Connecter connecter;
 
-    public GetDepartures(TextView status) {
+    public GetDepartures(TextView status, Connecter connecter) {
         this.status = status;
+        this.connecter = connecter;
     }
 
     protected void onPostExecute(String s) {
@@ -161,6 +173,23 @@ class GetDepartures extends AsyncTask<String, Void, String> {
     }
 
     protected String doInBackground(String... params) {
-        return params[0];
+        try {
+            URLConnection con = connecter.getConnection(params[0]);
+            return readDepartures(new BufferedReader(new InputStreamReader(con.getInputStream())));
+        } catch (IOException e) {
+            return "";
+        } catch (JSONException e) {
+            return "";
+        }
+    }
+
+    private String readDepartures(BufferedReader reader) throws JSONException, IOException {
+        JSONArray trains = new JSONObject(reader.readLine()).getJSONArray("trains");
+        if (trains.length() > 0) {
+            String dateTime = ((JSONObject) trains.get(0)).getString("ExpectedDateTime");
+            return dateTime.length() > 11 ? dateTime.substring(11) : dateTime;
+        } else {
+            return "no trains";
+        }
     }
 }
