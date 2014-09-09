@@ -30,7 +30,17 @@ public class GetDeparturesTest {
 
         String result = subject.doInBackground("9542");
 
-        assertThat(result, is("22:07:00"));
+        assertThat(result, is("5251 22:07:00 Gnesta"));
+    }
+
+    @Test
+    public void testBuses() throws Exception {
+        String json = "{\"buses\":[{\"JourneyDirection\":1,\"SecondaryDestinationName\":null,\"StopAreaName\":\"Järna\",\"StopAreaNumber\":5251,\"StopPointNumber\":5251,\"StopPointDesignation\":\"2\",\"TimeTabledDateTime\":\"2014-09-01T22:07:00\",\"ExpectedDateTime\":\"2014-09-01T22:07:00\",\"DisplayTime\":\"10 min\",\"Deviations\":null,\"TransportMode\":\"TRAIN\",\"LineNumber\":\"37\",\"Destination\":\"Gnesta\",\"SiteId\":9542},{\"JourneyDirection\":2,\"SecondaryDestinationName\":null,\"StopAreaName\":\"Järna\",\"StopAreaNumber\":5251,\"StopPointNumber\":5252,\"StopPointDesignation\":\"3\",\"TimeTabledDateTime\":\"2014-09-01T22:50:00\",\"ExpectedDateTime\":\"2014-09-01T22:50:00\",\"DisplayTime\":\"22:50\",\"Deviations\":null,\"TransportMode\":\"TRAIN\",\"LineNumber\":\"37\",\"Destination\":\"Södertälje C\",\"SiteId\":9542}],\"StopAreaName\":\"Järna\",\"SiteId\":9542}";
+        GetDepartures subject = new GetDepartures(null, connecterMock(connectionMock(json)));
+
+        String result = subject.doInBackground("9542");
+
+        assertThat(result, is("5251 22:07:00 Gnesta"));
     }
 
     @Test
@@ -40,7 +50,7 @@ public class GetDeparturesTest {
 
         String result = subject.doInBackground("9542");
 
-        assertThat(result, is("no trains"));
+        assertThat(result, is("no departures"));
     }
 
     private URLConnection connectionMock(String json) throws IOException {

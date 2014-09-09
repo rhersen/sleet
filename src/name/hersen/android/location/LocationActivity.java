@@ -21,6 +21,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
 public class LocationActivity extends Activity implements LocationListener {
@@ -177,19 +178,26 @@ class GetDepartures extends AsyncTask<String, Void, String> {
             URLConnection con = connecter.getConnection(params[0]);
             return readDepartures(new BufferedReader(new InputStreamReader(con.getInputStream())));
         } catch (IOException e) {
-            return "";
+            return "no departures";
         } catch (JSONException e) {
-            return "";
+            return "no departures";
         }
     }
 
     private String readDepartures(BufferedReader reader) throws JSONException, IOException {
-        JSONArray trains = new JSONObject(reader.readLine()).getJSONArray("trains");
-        if (trains.length() > 0) {
-            String dateTime = ((JSONObject) trains.get(0)).getString("ExpectedDateTime");
-            return dateTime.length() > 11 ? dateTime.substring(11) : dateTime;
-        } else {
-            return "no trains";
+        JSONObject jsonObject = new JSONObject(reader.readLine());
+
+        for (String s : asList("trains", "buses", "trams", "metro")) {
+            JSONArray departures = jsonObject.optJSONArray(s);
+
+            if (departures != null && departures.length() > 0) {
+                JSONObject departure = (JSONObject) departures.get(0);
+                String dateTime = departure.getString("ExpectedDateTime");
+                String time = dateTime.length() > 11 ? dateTime.substring(11) : dateTime;
+                return departure.getString("StopAreaNumber") + " " + time + " " + departure.getString("Destination");
+            }
         }
+
+        return "no departures";
     }
 }
