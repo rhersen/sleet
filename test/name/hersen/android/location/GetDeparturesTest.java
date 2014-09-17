@@ -28,7 +28,7 @@ public class GetDeparturesTest {
         String json = "{\"trains\":[{\"JourneyDirection\":1,\"SecondaryDestinationName\":null,\"StopAreaName\":\"Järna\",\"StopAreaNumber\":5251,\"StopPointNumber\":5251,\"StopPointDesignation\":\"2\",\"TimeTabledDateTime\":\"2014-09-01T22:07:00\",\"ExpectedDateTime\":\"2014-09-01T22:07:00\",\"DisplayTime\":\"10 min\",\"Deviations\":null,\"TransportMode\":\"TRAIN\",\"LineNumber\":\"37\",\"Destination\":\"Gnesta\",\"SiteId\":9542},{\"JourneyDirection\":2,\"SecondaryDestinationName\":null,\"StopAreaName\":\"Järna\",\"StopAreaNumber\":5251,\"StopPointNumber\":5252,\"StopPointDesignation\":\"3\",\"TimeTabledDateTime\":\"2014-09-01T22:50:00\",\"ExpectedDateTime\":\"2014-09-01T22:50:00\",\"DisplayTime\":\"22:50\",\"Deviations\":null,\"TransportMode\":\"TRAIN\",\"LineNumber\":\"37\",\"Destination\":\"Södertälje C\",\"SiteId\":9542}],\"StopAreaName\":\"Järna\",\"SiteId\":9542}";
         GetDepartures subject = new GetDepartures(null, connecterMock(connectionMock(json)));
 
-        String result = subject.doInBackground("9542");
+        String result = subject.doInBackground("9542", "5251");
 
         assertThat(result, is("5251 22:07:00 Gnesta"));
     }
@@ -38,7 +38,7 @@ public class GetDeparturesTest {
         String json = "{\"buses\":[{\"JourneyDirection\":1,\"SecondaryDestinationName\":null,\"StopAreaName\":\"Järna\",\"StopAreaNumber\":5251,\"StopPointNumber\":5251,\"StopPointDesignation\":\"2\",\"TimeTabledDateTime\":\"2014-09-01T22:07:00\",\"ExpectedDateTime\":\"2014-09-01T22:07:00\",\"DisplayTime\":\"10 min\",\"Deviations\":null,\"TransportMode\":\"TRAIN\",\"LineNumber\":\"37\",\"Destination\":\"Gnesta\",\"SiteId\":9542},{\"JourneyDirection\":2,\"SecondaryDestinationName\":null,\"StopAreaName\":\"Järna\",\"StopAreaNumber\":5251,\"StopPointNumber\":5252,\"StopPointDesignation\":\"3\",\"TimeTabledDateTime\":\"2014-09-01T22:50:00\",\"ExpectedDateTime\":\"2014-09-01T22:50:00\",\"DisplayTime\":\"22:50\",\"Deviations\":null,\"TransportMode\":\"TRAIN\",\"LineNumber\":\"37\",\"Destination\":\"Södertälje C\",\"SiteId\":9542}],\"StopAreaName\":\"Järna\",\"SiteId\":9542}";
         GetDepartures subject = new GetDepartures(null, connecterMock(connectionMock(json)));
 
-        String result = subject.doInBackground("9542");
+        String result = subject.doInBackground("9542", "5251");
 
         assertThat(result, is("5251 22:07:00 Gnesta"));
     }
@@ -48,7 +48,7 @@ public class GetDeparturesTest {
         String json = "{\"trains\":[]}";
         GetDepartures subject = new GetDepartures(null, connecterMock(connectionMock(json)));
 
-        String result = subject.doInBackground("9542");
+        String result = subject.doInBackground("9542", "5251");
 
         assertThat(result, is("no departures"));
     }
@@ -61,7 +61,7 @@ public class GetDeparturesTest {
 
     private Connecter connecterMock(URLConnection urlConnection) throws IOException {
         Connecter mock = mock(Connecter.class);
-        when(mock.getConnection(anyString())).thenReturn(urlConnection);
+        when(mock.getConnection(anyString(), anyString())).thenReturn(urlConnection);
         return mock;
     }
 

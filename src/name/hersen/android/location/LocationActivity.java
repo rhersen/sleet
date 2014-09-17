@@ -130,8 +130,8 @@ class Connecter {
         return url.openConnection();
     }
 
-    public URLConnection getConnection(String site) throws IOException {
-        URL url = new URL("http://" + server + "/departures/" + site);
+    public URLConnection getConnection(String site, String area) throws IOException {
+        URL url = new URL("http://" + server + "/departures/" + site + "?area=" + area);
         return url.openConnection();
     }
 }
@@ -151,7 +151,7 @@ class Row implements View.OnClickListener {
     }
 
     public void onClick(View v) {
-        new GetDepartures(status, connecter).execute(stopPoint.site);
+        new GetDepartures(status, connecter).execute(stopPoint.site, stopPoint.area);
     }
 
     void setStopPoint(StopPoint p) {
@@ -175,7 +175,7 @@ class GetDepartures extends AsyncTask<String, Void, String> {
 
     protected String doInBackground(String... params) {
         try {
-            URLConnection con = connecter.getConnection(params[0]);
+            URLConnection con = connecter.getConnection(params[0], params[1]);
             return readDepartures(new BufferedReader(new InputStreamReader(con.getInputStream())));
         } catch (IOException e) {
             return "no departures";
